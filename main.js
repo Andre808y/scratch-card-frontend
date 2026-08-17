@@ -38,7 +38,7 @@ function startScratchCard(sessionId) {
 async function bootstrap() {
   // В dev-режиме (?dev=1, вне Telegram) дожидаемся, пока dev-mock.js подготовит подписанный
   // initData, прежде чем делать первый запрос к API — в реальном Telegram-клиенте это уже
-  // готовый resolved-промис (см. src/dev-mock.js).
+  // готовый resolved-промис (см. dev-mock.js).
   await window.__devMockReady;
 
   window.Telegram?.WebApp?.ready?.();

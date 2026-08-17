@@ -10,7 +10,7 @@ function initData() {
 }
 
 // Приоритет: ?api=... (только для локальной разработки, см. dev-mock.js) → config.js
-// (прод-адрес backend на Render, см. src/config.js) → относительный путь как последний фолбэк.
+// (прод-адрес backend на Render, см. ../config.js) → относительный путь как последний фолбэк.
 function apiBaseUrl() {
   return window.__API_BASE_URL__ || API_BASE_URL || "";
 }

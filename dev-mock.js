@@ -47,8 +47,8 @@ function isDevModeRequested() {
 }
 
 // Позволяет указать адрес backend через ?api=http://host:port, когда frontend и backend подняты
-// на разных портах локально (см. src/services/api-client.js). В проде параметр не передаётся,
-// и используются относительные пути (один origin с backend).
+// на разных портах локально (см. services/api-client.js). В проде параметр не передаётся —
+// используется API_BASE_URL из config.js (см. этот файл).
 const apiParam = new URLSearchParams(window.location.search).get("api");
 if (apiParam) {
   window.__API_BASE_URL__ = apiParam;

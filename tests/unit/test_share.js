@@ -30,7 +30,7 @@ test("shareBotLink calls Telegram switchInlineQuery when available", async () =>
     },
   };
 
-  const { shareBotLink } = await import("../../src/pages/share.js");
+  const { shareBotLink } = await import("../../pages/share.js");
   shareBotLink();
 
   assert.equal(calls.length, 1);
@@ -42,7 +42,7 @@ test("shareBotLink does nothing without Telegram WebApp context", async () => {
   installFakeDom();
   globalThis.window = {};
 
-  const { shareBotLink } = await import("../../src/pages/share.js?no-telegram");
+  const { shareBotLink } = await import("../../pages/share.js?no-telegram");
 
   assert.doesNotThrow(() => shareBotLink());
 });
