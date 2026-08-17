@@ -41,7 +41,17 @@ async function bootstrap() {
   // готовый resolved-промис (см. dev-mock.js).
   await window.__devMockReady;
 
-  window.Telegram?.WebApp?.ready?.();
+  // TODO(debug): временная диагностика продакшен-бага "не удалось загрузить игру" — открой
+  // консоль браузера (см. инструкцию в README) и пришли разработчику эти строки целиком.
+  const webApp = window.Telegram?.WebApp;
+  const rawInitData = window.__DEV_INIT_DATA__ || webApp?.initData || "";
+  console.log("[diag] window.Telegram существует:", Boolean(window.Telegram));
+  console.log("[diag] window.Telegram.WebApp существует:", Boolean(webApp));
+  console.log("[diag] initData длина:", rawInitData.length);
+  console.log("[diag] initData (сырое значение):", rawInitData);
+  console.log("[diag] platform/version:", webApp?.platform, webApp?.version);
+
+  webApp?.ready?.();
   showScreen("loading");
 
   const { body: status } = await apiClient.getStatus();
@@ -62,8 +72,10 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error(error);
+  console.error("[diag] bootstrap упал:", error);
   showScreen("loading");
+  // TODO(debug): показываем техническую деталь прямо на экране, чтобы не нужен был доступ к
+  // консоли браузера для первичной диагностики. Убрать текст ошибки из UI после отладки.
   screens.loading.querySelector(".hint").textContent =
-    "Не удалось загрузить игру. Попробуй позже.";
+    `Не удалось загрузить игру. ${error.message || error}`;
 });

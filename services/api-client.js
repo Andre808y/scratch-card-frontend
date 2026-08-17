@@ -16,16 +16,24 @@ function apiBaseUrl() {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(`${apiBaseUrl()}${path}`, {
+  const url = `${apiBaseUrl()}${path}`;
+  const authHeader = `tma ${initData()}`;
+  console.log("[diag] запрос:", url, "Authorization длина:", authHeader.length);
+
+  const response = await fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `tma ${initData()}`,
+      Authorization: authHeader,
       ...(options.headers || {}),
     },
   });
+
   if (!response.ok && response.status !== 409) {
-    throw new Error(`Request to ${path} failed with ${response.status}`);
+    // TODO(debug): текст ошибки от backend в сообщении — временно, для диагностики без консоли.
+    const detail = await response.text().catch(() => "");
+    console.log("[diag] ответ backend:", response.status, detail);
+    throw new Error(`${path} -> ${response.status} ${detail}`);
   }
   return { status: response.status, body: await response.json() };
 }
