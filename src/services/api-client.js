@@ -2,16 +2,17 @@
  * Клиент backend API (см. contracts/api.md). Все запросы подписаны Telegram initData.
  */
 
+import { API_BASE_URL } from "../config.js";
+
 function initData() {
   // window.__DEV_INIT_DATA__ — заглушка из dev-mock.js для локального тестирования вне Telegram.
   return window.__DEV_INIT_DATA__ || window.Telegram?.WebApp?.initData || "";
 }
 
-// В проде frontend и backend делят один origin (относительные пути). Для локальной разработки,
-// когда backend поднят на другом порту, базовый URL можно передать через ?api=..., иначе
-// используются относительные пути без изменений (см. dev-mock.js).
+// Приоритет: ?api=... (только для локальной разработки, см. dev-mock.js) → config.js
+// (прод-адрес backend на Render, см. src/config.js) → относительный путь как последний фолбэк.
 function apiBaseUrl() {
-  return window.__API_BASE_URL__ || "";
+  return window.__API_BASE_URL__ || API_BASE_URL || "";
 }
 
 async function request(path, options = {}) {
