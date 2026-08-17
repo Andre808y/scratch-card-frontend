@@ -15,7 +15,12 @@
 html,
 body {
   margin: 0;
+  width: 100%;
   height: 100%;
+  /* Защитный барьер: если какой-то элемент всё же вылезет за ширину экрана (например,
+     из-за особенностей вьюпорта Telegram Mini App WebView на конкретном устройстве),
+     страница не должна становиться горизонтально прокручиваемой и "уезжать" вбок. */
+  overflow-x: hidden;
   background: var(--brand-bg);
   color: var(--brand-text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -23,6 +28,7 @@ body {
 
 .app {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,6 +45,11 @@ body {
   text-align: center;
 }
 
+.screen,
+.screen * {
+  max-width: 100%;
+}
+
 .title {
   font-size: 22px;
   font-weight: 700;
@@ -53,8 +64,9 @@ body {
 
 .scratch-card-root {
   position: relative;
-  width: 320px;
-  height: 200px;
+  width: 100%;
+  max-width: 340px;
+  min-height: 220px;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
@@ -65,6 +77,21 @@ body {
   position: absolute;
   inset: 0;
   touch-action: none;
+}
+
+/* Слой с призом лежит под canvas (см. scratch-card.js) — стирание canvas физически
+   открывает именно этот контент, а не отдельный экран после стирания. */
+.scratch-reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  text-align: center;
+  background: var(--brand-surface);
 }
 
 .result-card {

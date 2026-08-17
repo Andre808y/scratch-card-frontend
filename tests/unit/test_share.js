@@ -35,7 +35,7 @@ test("shareBotLink calls Telegram switchInlineQuery when available", async () =>
 
   assert.equal(calls.length, 1);
   assert.deepEqual(calls[0].targets, ["users", "groups"]);
-  assert.match(calls[0].text, /скидку/);
+  assert.match(calls[0].text, /приз/);
 });
 
 test("shareBotLink does nothing without Telegram WebApp context", async () => {

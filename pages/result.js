@@ -1,6 +1,7 @@
 /**
- * Экран результата раунда: приз (промокод) или дружелюбное сообщение об отсутствии выигрыша
- * (FR-005, FR-011). Стилизован под фирменный вид магазина электроники (styles.css).
+ * Приз (или сообщение об отсутствии выигрыша) — рендерится ПОД canvas скретч-карты
+ * (см. scratch-card/scratch-card.js), а не отдельным экраном после стирания: физически
+ * стирая слой, пользователь открывает именно этот контент, а не переходит на другой экран.
  */
 
 import { renderShareButton } from "./share.js";
@@ -10,29 +11,26 @@ function formatDate(isoString) {
   return new Date(isoString).toLocaleDateString("ru-RU");
 }
 
-export function renderResult(root, result) {
-  root.innerHTML = "";
-
-  const card = document.createElement("div");
+export function renderScratchReveal(root, result) {
+  const reveal = document.createElement("div");
+  reveal.className = "scratch-reveal";
 
   if (result.outcome === "win") {
-    card.className = "result-card win";
-    card.innerHTML = `
-      <h2 class="title">🎉 Ты выиграл!</h2>
-      <p class="hint">${result.prize.discount_value}</p>
+    reveal.innerHTML = `
+      <p class="title">🎉 ${result.prize.discount_value}</p>
       <div class="prize-code">${result.prize.code}</div>
       <p class="hint">Покажи этот код продавцу в магазине, чтобы получить приз.
       Действует до ${formatDate(result.prize.expires_at)}</p>
     `;
   } else {
-    card.className = "result-card no-win";
-    card.innerHTML = `
-      <h2 class="title">Почти повезло!</h2>
+    reveal.innerHTML = `
+      <p class="title">Почти повезло!</p>
       <p class="hint">В этот раз без приза. Загляни снова через 24 часа — новая карта уже
       готовится.</p>
     `;
   }
 
-  root.appendChild(card);
-  root.appendChild(renderShareButton());
+  reveal.appendChild(renderShareButton());
+  root.appendChild(reveal);
+  return reveal;
 }

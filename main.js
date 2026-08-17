@@ -1,17 +1,20 @@
 /**
- * Точка входа Mini App: оркестрирует экраны loading → scratch → result/cooldown
+ * Точка входа Mini App: оркестрирует экраны loading → scratch → cooldown
  * (см. quickstart.md, сценарии User Story 1 и 2).
+ *
+ * Экран scratch содержит и стирание карты, и сам приз: результат запрашивается у backend
+ * сразу при переходе на этот экран и рендерится ПОД canvas (см. pages/result.js) — стирая
+ * слой, пользователь физически открывает уже готовый приз, а не переходит на другой экран.
  */
 
 import { apiClient } from "./services/api-client.js";
 import { mountScratchCard } from "./scratch-card/scratch-card.js";
-import { renderResult } from "./pages/result.js";
+import { renderScratchReveal } from "./pages/result.js";
 import { renderCooldown } from "./pages/cooldown.js";
 
 const screens = {
   loading: document.getElementById("screen-loading"),
   scratch: document.getElementById("screen-scratch"),
-  result: document.getElementById("screen-result"),
   cooldown: document.getElementById("screen-cooldown"),
 };
 
@@ -21,17 +24,18 @@ function showScreen(name) {
   });
 }
 
-async function revealAndShowResult(sessionId) {
-  const { body } = await apiClient.revealSession(sessionId);
-  showScreen("result");
-  renderResult(screens.result, body);
-}
-
-function startScratchCard(sessionId) {
+async function startScratchCard(sessionId) {
   showScreen("scratch");
   const root = document.getElementById("scratch-card-root");
+  const hint = document.getElementById("scratch-hint");
+
+  const { body: result } = await apiClient.revealSession(sessionId);
+  renderScratchReveal(root, result);
+
   mountScratchCard(root, {
-    onScratched: () => revealAndShowResult(sessionId),
+    onScratched: () => {
+      if (hint) hint.hidden = true;
+    },
   });
 }
 
@@ -52,13 +56,11 @@ async function bootstrap() {
     return;
   }
 
-  if (status.active_session) {
-    startScratchCard(status.active_session.session_id);
-    return;
-  }
+  const sessionId = status.active_session
+    ? status.active_session.session_id
+    : (await apiClient.createSession()).body.session_id;
 
-  const { body: session } = await apiClient.createSession();
-  startScratchCard(session.session_id);
+  await startScratchCard(sessionId);
 }
 
 bootstrap().catch((error) => {

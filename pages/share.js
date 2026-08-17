@@ -3,7 +3,7 @@
  * без обращения к backend (см. contracts/api.md, раздел «Шеринг»).
  */
 
-const BOT_SHARE_TEXT = "Я выиграл скидку в скретч-карте магазина электроники — попробуй тоже!";
+const BOT_SHARE_TEXT = "Я выиграл приз в скретч-карте магазина электроники — попробуй тоже!";
 
 export function shareBotLink() {
   const webApp = window.Telegram?.WebApp;
