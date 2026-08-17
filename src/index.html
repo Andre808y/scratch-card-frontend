@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Скретч-карта магазина электроники</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <main id="app" class="app">
+    <section id="screen-loading" class="screen" data-screen="loading">
+      <p class="hint">Загрузка…</p>
+    </section>
+
+    <section id="screen-scratch" class="screen" data-screen="scratch" hidden>
+      <h1 class="title">Сотри карту — забери приз</h1>
+      <div id="scratch-card-root" class="scratch-card-root"></div>
+      <p class="hint">Проведи пальцем по карте</p>
+    </section>
+
+    <section id="screen-result" class="screen" data-screen="result" hidden></section>
+
+    <section id="screen-cooldown" class="screen" data-screen="cooldown" hidden></section>
+  </main>
+
+  <script type="module" src="./dev-mock.js"></script>
+  <script type="module" src="./services/api-client.js"></script>
+  <script type="module" src="./scratch-card/scratch-card.js"></script>
+  <script type="module" src="./pages/result.js"></script>
+  <script type="module" src="./pages/cooldown.js"></script>
+  <script type="module" src="./pages/share.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
