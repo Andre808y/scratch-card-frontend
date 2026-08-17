@@ -21,6 +21,28 @@ function showScreen(name) {
   });
 }
 
+// TODO(debug): временная on-screen диагностика бага "не удалось загрузить игру" на реальных
+// устройствах, где нет доступа к консоли браузера. Убрать вместе с #debug-panel в index.html
+// и .debug-panel в styles.css после того, как причина найдена и подтверждена.
+function setDebugPanel(text) {
+  const panel = document.getElementById("debug-panel");
+  if (panel) panel.textContent = text;
+}
+
+function collectInitDataDiagnostics() {
+  const webApp = window.Telegram?.WebApp;
+  const rawInitData = window.__DEV_INIT_DATA__ || webApp?.initData || "";
+  const lines = [
+    "[DEBUG] initData:",
+    `  window.Telegram есть: ${Boolean(window.Telegram)}`,
+    `  window.Telegram.WebApp есть: ${Boolean(webApp)}`,
+    `  initData пустой: ${rawInitData.length === 0}`,
+    `  initData длина: ${rawInitData.length}`,
+    `  platform: ${webApp?.platform ?? "—"}, version: ${webApp?.version ?? "—"}`,
+  ];
+  return { rawInitData, lines };
+}
+
 async function revealAndShowResult(sessionId) {
   const { body } = await apiClient.revealSession(sessionId);
   showScreen("result");
@@ -41,20 +63,26 @@ async function bootstrap() {
   // готовый resolved-промис (см. dev-mock.js).
   await window.__devMockReady;
 
-  // TODO(debug): временная диагностика продакшен-бага "не удалось загрузить игру" — открой
-  // консоль браузера (см. инструкцию в README) и пришли разработчику эти строки целиком.
-  const webApp = window.Telegram?.WebApp;
-  const rawInitData = window.__DEV_INIT_DATA__ || webApp?.initData || "";
-  console.log("[diag] window.Telegram существует:", Boolean(window.Telegram));
-  console.log("[diag] window.Telegram.WebApp существует:", Boolean(webApp));
-  console.log("[diag] initData длина:", rawInitData.length);
-  console.log("[diag] initData (сырое значение):", rawInitData);
-  console.log("[diag] platform/version:", webApp?.platform, webApp?.version);
+  const { lines: initDataLines } = collectInitDataDiagnostics();
+  console.log("[diag]", initDataLines.join("\n"));
+  setDebugPanel([...initDataLines, "", "Запрос GET /api/game/status..."].join("\n"));
 
-  webApp?.ready?.();
+  window.Telegram?.WebApp?.ready?.();
   showScreen("loading");
 
-  const { body: status } = await apiClient.getStatus();
+  let status;
+  try {
+    const result = await apiClient.getStatus();
+    status = result.body;
+    setDebugPanel(
+      [...initDataLines, "", `GET /status -> ${result.status}`, JSON.stringify(result.body)].join(
+        "\n"
+      )
+    );
+  } catch (error) {
+    setDebugPanel([...initDataLines, "", "GET /status упал:", error.message].join("\n"));
+    throw error;
+  }
 
   if (!status.eligible && !status.active_session) {
     showScreen("cooldown");
