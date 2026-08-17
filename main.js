@@ -21,28 +21,6 @@ function showScreen(name) {
   });
 }
 
-// TODO(debug): временная on-screen диагностика бага "не удалось загрузить игру" на реальных
-// устройствах, где нет доступа к консоли браузера. Убрать вместе с #debug-panel в index.html
-// и .debug-panel в styles.css после того, как причина найдена и подтверждена.
-function setDebugPanel(text) {
-  const panel = document.getElementById("debug-panel");
-  if (panel) panel.textContent = text;
-}
-
-function collectInitDataDiagnostics() {
-  const webApp = window.Telegram?.WebApp;
-  const rawInitData = window.__DEV_INIT_DATA__ || webApp?.initData || "";
-  const lines = [
-    "[DEBUG] initData:",
-    `  window.Telegram есть: ${Boolean(window.Telegram)}`,
-    `  window.Telegram.WebApp есть: ${Boolean(webApp)}`,
-    `  initData пустой: ${rawInitData.length === 0}`,
-    `  initData длина: ${rawInitData.length}`,
-    `  platform: ${webApp?.platform ?? "—"}, version: ${webApp?.version ?? "—"}`,
-  ];
-  return { rawInitData, lines };
-}
-
 async function revealAndShowResult(sessionId) {
   const { body } = await apiClient.revealSession(sessionId);
   showScreen("result");
@@ -63,26 +41,10 @@ async function bootstrap() {
   // готовый resolved-промис (см. dev-mock.js).
   await window.__devMockReady;
 
-  const { lines: initDataLines } = collectInitDataDiagnostics();
-  console.log("[diag]", initDataLines.join("\n"));
-  setDebugPanel([...initDataLines, "", "Запрос GET /api/game/status..."].join("\n"));
-
   window.Telegram?.WebApp?.ready?.();
   showScreen("loading");
 
-  let status;
-  try {
-    const result = await apiClient.getStatus();
-    status = result.body;
-    setDebugPanel(
-      [...initDataLines, "", `GET /status -> ${result.status}`, JSON.stringify(result.body)].join(
-        "\n"
-      )
-    );
-  } catch (error) {
-    setDebugPanel([...initDataLines, "", "GET /status упал:", error.message].join("\n"));
-    throw error;
-  }
+  const { body: status } = await apiClient.getStatus();
 
   if (!status.eligible && !status.active_session) {
     showScreen("cooldown");
@@ -100,10 +62,8 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error("[diag] bootstrap упал:", error);
+  console.error(error);
   showScreen("loading");
-  // TODO(debug): показываем техническую деталь прямо на экране, чтобы не нужен был доступ к
-  // консоли браузера для первичной диагностики. Убрать текст ошибки из UI после отладки.
   screens.loading.querySelector(".hint").textContent =
-    `Не удалось загрузить игру. ${error.message || error}`;
+    "Не удалось загрузить игру. Попробуй позже.";
 });
