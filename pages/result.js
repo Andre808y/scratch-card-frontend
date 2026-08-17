@@ -19,9 +19,10 @@ export function renderResult(root, result) {
     card.className = "result-card win";
     card.innerHTML = `
       <h2 class="title">🎉 Ты выиграл!</h2>
-      <p class="hint">Скидка ${result.prize.discount_value} на следующий заказ</p>
+      <p class="hint">${result.prize.discount_value}</p>
       <div class="prize-code">${result.prize.code}</div>
-      <p class="hint">Промокод действует до ${formatDate(result.prize.expires_at)}</p>
+      <p class="hint">Покажи этот код продавцу в магазине, чтобы получить приз.
+      Действует до ${formatDate(result.prize.expires_at)}</p>
     `;
   } else {
     card.className = "result-card no-win";
